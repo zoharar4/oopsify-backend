@@ -1,4 +1,4 @@
 export default {
-  dbURL: process.env.MONGO_URL || 'mongodb+srv://theUser:thePass@cluster0-klgzh.mongodb.net/test?retryWrites=true&w=majority',
+  dbURL: process.env.MONGO_URL || 'mongodb+srv://zoharar7788_db_user:ASlAdWIGoDG3nPgU@oopsify.legpe7f.mongodb.net/?appName=oopsify',
   dbName : process.env.DB_NAME || 'tester_db'
 }
