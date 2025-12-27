@@ -59,6 +59,7 @@ async function update(user) {
         // peek only updatable properties
         const userToSave = {
             _id: ObjectId.createFromHexString(user._id), // needed for the returned obj
+            username:user.username,
             fullname: user.fullname,
             likedTracks: user.likedTracks,
             stations: user.stations,
@@ -79,11 +80,7 @@ async function add(user) {
             username: user.username,
             password: user.password,
             fullname: user.fullname,
-            likedTracks: {
-                name: 'Liked Tracks',
-                tracks: [],
-                images: [{ url: '/src/assets/images/liked-songs.png' }],
-            },
+            likedTracks: {},
             stations: [],
             isAdmin: user.isAdmin,
         }

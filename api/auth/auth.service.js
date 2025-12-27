@@ -41,12 +41,13 @@ async function signup({ username, password, fullname, isAdmin }) {
 	return userService.add({ username, password: hash, fullname, isAdmin })
 }
 
-function getLoginToken(user) {
-	const userInfo = { 
-        _id: user._id, 
-        fullname: user.fullname, 
-        isAdmin: user.isAdmin,
-    }
+function getLoginToken({ _id, username, fullname, stations, likedTracks, isAdmin }) {
+	const userInfo = {
+		_id,
+		username,
+		fullname,
+		isAdmin
+	}
 	return cryptr.encrypt(JSON.stringify(userInfo))
 }
 

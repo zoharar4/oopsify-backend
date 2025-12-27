@@ -1,29 +1,30 @@
 import { authService } from './auth.service.js'
 import { logger } from '../../services/logger.service.js'
 
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: 'lax',
+}
+
 export async function login(req, res) {
 	const { username, password } = req.body
 	try {
 		const user = await authService.login(username, password)
 		const loginToken = authService.getLoginToken(user)
-        
+		console.log('loginToken:',loginToken.length)
 		logger.info('User login: ', user)
         
-		res.cookie('loginToken', loginToken, { sameSite: 'None', secure: true })
+		res.cookie('loginToken', loginToken, cookieOptions)
 		res.json(user)
 	} catch (err) {
 		logger.error('Failed to Login ' + err)
-		res.status(401).send({ err: 'Failed to Login' })
+		res.status(402).send({ err: 'Failed to Login' })
 	}
 }
 
 export async function signup(req, res) {
 	try {
 		const credentials = req.body
-		console.log('credentials:',credentials)
-		console.log('credentials:',credentials)
-		// Never log passwords
-		// logger.debug(credentials)
 		
         const account = await authService.signup(credentials) // checks if username is taken and save in db
 		logger.debug(`auth.route - new account created: ` + JSON.stringify(account))
@@ -32,7 +33,7 @@ export async function signup(req, res) {
 		logger.info('User signup:', user)
 		
         const loginToken = authService.getLoginToken(user)
-		res.cookie('loginToken', loginToken, { sameSite: 'None', secure: true })
+		res.cookie('loginToken', loginToken, cookieOptions)
 		res.json(user)
 	} catch (err) {
 		logger.error('Failed to signup ' + err)
@@ -42,7 +43,7 @@ export async function signup(req, res) {
 
 export async function logout(req, res) {
 	try {
-		res.clearCookie('loginToken')
+		res.clearCookie('loginToken',cookieOptions)
 		res.send({ msg: 'Logged out successfully' })
 	} catch (err) {
 		res.status(400).send({ err: 'Failed to logout' })
