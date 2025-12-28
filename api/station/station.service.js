@@ -33,28 +33,29 @@ async function query(filterBy = null) {
 	}
 }
 
-async function getById(carId) {
+async function getById(stationId) {
+	console.log(stationId)
 	try {
-		const criteria = { _id: ObjectId.createFromHexString(carId) }
+		const criteria = { _id: stationId }
 
 		const collection = await dbService.getCollection('station')
 		const station = await collection.findOne(criteria)
 
-		station.createdAt = station._id.getTimestamp()
+		//station.createdAt = station._id.getTimestamp()
 		return station
 	} catch (err) {
-		logger.error(`while finding station ${carId}`, err)
+		logger.error(`while finding station ${stationId}`, err)
 		throw err
 	}
 }
 
-async function remove(carId) {
+async function remove(stationId) {
 	const { loggedinUser } = asyncLocalStorage.getStore()
 	const { _id: ownerId, isAdmin } = loggedinUser
 
 	try {
 		const criteria = {
-			_id: ObjectId.createFromHexString(carId),
+			_id: ObjectId.createFromHexString(stationId),
 		}
 		if (!isAdmin) criteria['owner._id'] = ownerId
 
@@ -62,9 +63,9 @@ async function remove(carId) {
 		const res = await collection.deleteOne(criteria)
 
 		if (res.deletedCount === 0) throw ('Not your station')
-		return carId
+		return stationId
 	} catch (err) {
-		logger.error(`cannot remove station ${carId}`, err)
+		logger.error(`cannot remove station ${stationId}`, err)
 		throw err
 	}
 }
@@ -101,9 +102,9 @@ async function update(station, loggedinUser) {
 	}
 }
 
-async function addStationMsg(carId, msg) {
+async function addStationMsg(stationId, msg) {
 	try {
-		const criteria = { _id: ObjectId.createFromHexString(carId) }
+		const criteria = { _id: ObjectId.createFromHexString(stationId) }
 		msg.id = makeId()
 
 		const collection = await dbService.getCollection('station')
@@ -111,21 +112,21 @@ async function addStationMsg(carId, msg) {
 
 		return msg
 	} catch (err) {
-		logger.error(`cannot add station msg ${carId}`, err)
+		logger.error(`cannot add station msg ${stationId}`, err)
 		throw err
 	}
 }
 
-async function removeStationMsg(carId, msgId) {
+async function removeStationMsg(stationId, msgId) {
 	try {
-		const criteria = { _id: ObjectId.createFromHexString(carId) }
+		const criteria = { _id: ObjectId.createFromHexString(stationId) }
 
 		const collection = await dbService.getCollection('station')
 		await collection.updateOne(criteria, { $pull: { msgs: { id: msgId } } })
 
 		return msgId
 	} catch (err) {
-		logger.error(`cannot remove station msg ${carId}`, err)
+		logger.error(`cannot remove station msg ${stationId}`, err)
 		throw err
 	}
 }

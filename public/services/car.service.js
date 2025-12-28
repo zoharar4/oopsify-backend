@@ -18,12 +18,12 @@ window.cs = stationService
 async function query(filterBy = { txt: '', price: 0 }) {
     return httpService.get('station', filterBy)
 }
-function getById(carId) {
-    return httpService.get(`station/${carId}`)
+function getById(stationId) {
+    return httpService.get(`station/${stationId}`)
 }
 
-async function remove(carId) {
-    return httpService.delete(`station/${carId}`)
+async function remove(stationId) {
+    return httpService.delete(`station/${stationId}`)
 }
 async function save(station) {
     var savedStation
@@ -36,8 +36,8 @@ async function save(station) {
     return savedStation
 }
 
-async function addStationMsg(carId, txt) {
-    const savedMsg = await httpService.post(`station/${carId}/msg`, {txt})
+async function addStationMsg(stationId, txt) {
+    const savedMsg = await httpService.post(`station/${stationId}/msg`, {txt})
     return savedMsg
 }
 
