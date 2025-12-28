@@ -124,21 +124,14 @@ export async function addStationMsg(req, res) {
 // }
 
 export async function addTrack(req, res) {
-	try {
-		const stationId = req.params.id
-		const {track} = req.params
-		const station = await stationService.getById(stationId)
-		const trackMap = new Map((station.tracks || []).map(t => [t._id, t]))
-		trackMap.set(track._id, track)
-		const stationToUpdate = {
-			...station,
-			tracks: Array.from(trackMap.values()),
-		}
-		const updatedStation = await stationService.update(stationToUpdate)
-		res.json(updatedStation)
-	}
-	catch (err) {
-		logger.error('Failed to add track to station', err)
-		res.status(400).send({ err: 'Failed to add track to station' })
-	}
+    try {
+        const stationId = req.params.id
+        const track = req.body 
+		console.log(stationId)
+        const updatedStation = await stationService.addTrack(stationId, track)
+        res.json(updatedStation)
+    } catch (err) {
+        logger.error('Failed to add track to station', err)
+        res.status(400).send({ err: 'Failed to add track to station' })
+    }
 }

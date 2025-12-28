@@ -15,6 +15,7 @@ export const stationService = {
 	update,
 	addStationMsg,
 	removeStationMsg,
+	addTrack,
 }
 
 async function query(filterBy = null) {
@@ -114,7 +115,7 @@ async function update(station) {
         }
 		const collection = await dbService.getCollection('station')
 		await collection.updateOne(criteria, {$set: stationToSave })
-		return stationToSave
+		return {...stationToSave}
 	}
 	catch (err) {
 		logger.error(`cannot update station ${station._id}`, err)
@@ -158,4 +159,20 @@ function _buildCriteria(filterBy) {
 	}
 
 	return criteria
+}
+
+async function addTrack(stationId, track) {
+    try {
+        const collection = await dbService.getCollection('station')
+
+        await collection.updateOne(
+            { _id: ObjectId.createFromHexString(stationId) },
+            { $addToSet: { tracks: track } } 
+        )
+
+        return await collection.findOne({ _id: stationId })
+    } catch (err) {
+        logger.error(`cannot add track to station ${stationId}`, err)
+        throw err
+    }
 }

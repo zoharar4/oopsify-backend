@@ -15,7 +15,7 @@ router.post('/', log, requireAuth, addStation)
 router.put('/:id', requireAuth, updateStation)
 router.delete('/:id', requireAuth, removeStation)
 // router.post('/:id/msg', requireAuth, addStationMsg)
-// router.post('/:id',addTrack)
+router.post('/:id/track',requireAuth,addTrack)
 // 
 // router.delete('/:id/msg/:msgId', requireAuth, removeStationMsg)
 
