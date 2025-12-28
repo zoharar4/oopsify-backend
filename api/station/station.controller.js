@@ -3,8 +3,9 @@ import { stationService } from './station.service.js'
 
 export async function getStations(req, res) {
 	try {
+		console.log(req.stationsId)
 		const filterBy = {
-			stationsId:req.stationsId
+			stationsId:req?.stationsId
 		}
 		const stations = await stationService.query(filterBy)
 		res.json(stations)

@@ -19,12 +19,13 @@ export const stationService = {
 
 async function query(filterBy = null) {
 	try {
-		const criteria = _buildCriteria(filterBy)
+		const criteria = filterBy && filterBy.stationsId ? _buildCriteria(filterBy) : {}
 
 		const collection = await dbService.getCollection('station')
-		var carCursor = await collection.find(criteria)
+		var stationCursor = await collection.find(criteria)
 
-		const stations = carCursor.toArray()
+		const stations = stationCursor.toArray()
+		
 		return stations
 	} catch (err) {
 		logger.error('cannot find stations', err)
@@ -130,8 +131,9 @@ async function removeStationMsg(carId, msgId) {
 }
 
 function _buildCriteria(filterBy) {
+	console.log('criteria',filterBy)
 	const criteria = {
-		_id: {$in: filterBy.stationsId.map((id) => ObjectId.createFromHexString(id))}
+		_id: {$in: filterBy.stationsId.map((_id) => _id)}
 	}
 
 	return criteria
