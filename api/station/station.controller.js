@@ -1,83 +1,102 @@
 import { logger } from '../../services/logger.service.js'
-import { carService } from './station.service.js'
+import { stationService } from './station.service.js'
 
-export async function getCars(req, res) {
+export async function getStations(req, res) {
 	try {
 		const filterBy = {
-			txt: req.query.txt || '',
-			minSpeed: +req.query.minSpeed || 0,
-			sortField: req.query.sortField || '',
-			sortDir: req.query.sortDir || 1,
-			pageIdx: req.query.pageIdx,
+			stationsId:req.stationsId
 		}
-		const cars = await carService.query(filterBy)
-		res.json(cars)
+		const stations = await stationService.query(filterBy)
+		res.json(stations)
 	} catch (err) {
-		logger.error('Failed to get cars', err)
-		res.status(400).send({ err: 'Failed to get cars' })
+		logger.error('Failed to get stations', err)
+		res.status(400).send({ err: 'Failed to get stations' })
 	}
 }
 
-export async function getCarById(req, res) {
+export async function getStationById(req, res) {
 	try {
 		const carId = req.params.id
-		const car = await carService.getById(carId)
-		res.json(car)
+		const station = await stationService.getById(carId)
+		res.json(station)
 	} catch (err) {
-		logger.error('Failed to get car', err)
-		res.status(400).send({ err: 'Failed to get car' })
+		logger.error('Failed to get station', err)
+		res.status(400).send({ err: 'Failed to get station' })
 	}
 }
 
-export async function addCar(req, res) {
+export async function addStation(req, res) {
 	const { loggedinUser, body } = req
-	const car = {
-		vendor: body.vendor,
-		speed: body.speed
+	const stationToSave = {// use _id from now
+		description: body.description, 
+		images: body.images?.length
+			? body.images.map(img => ({ ...img }))
+			: [{ url: '/src/assets/images/default-img.png' }],
+		name: body.name,
+		tracks: body.tracks ? [...body.tracks] : [],
 	}
 	try {
-		car.owner = loggedinUser
-		const addedCar = await carService.add(car)
-		res.json(addedCar)
+		stationToSave.owner = loggedinUser
+		const addedStation = await stationService.add(stationToSave)
+		res.json(addedStation)
 	} catch (err) {
-		logger.error('Failed to add car', err)
-		res.status(400).send({ err: 'Failed to add car' })
+		logger.error('Failed to add station', err)
+		res.status(400).send({ err: 'Failed to add station' })
 	}
 }
 
 
-export async function updateUserStation(req, res) {
-	const { loggedinUser, body: station } = req
-	console.log('req:',req)
-	const { _id: userId, isAdmin } = loggedinUser
+// export async function updateUserStation(req, res) { zohar?
+// 	const { loggedinUser, body: station } = req
+// 	console.log('req:',req)
+// 	const { _id: userId, isAdmin } = loggedinUser
 
-	if (!isAdmin && station.owner.id !== userId) {
+// 	if (!isAdmin && station.owner.id !== userId) {
+// 		res.status(403).send('Not your station...')
+// 		return
+// 	}
+
+// 	try {
+// 		const updatedStation = await stationService.update(station, loggedinUser)
+// 		res.json(updatedStation)
+// 	} catch (err) {
+// 		logger.error('Failed to update station', err)
+// 		res.status(400).send({ err: 'Failed to update station' })
+// 	}
+// }
+
+export async function updateStation(req, res) {
+	const { loggedinUser, body: station } = req
+	console.log('req:', req)
+	const { _id: userId } = loggedinUser
+
+	if (station.owner.id !== userId) {
 		res.status(403).send('Not your station...')
 		return
 	}
 
 	try {
-		const updatedStation = await carService.update(station, loggedinUser)
+		const updatedStation = await stationService.update(station, loggedinUser)
 		res.json(updatedStation)
 	} catch (err) {
-		logger.error('Failed to update car', err)
-		res.status(400).send({ err: 'Failed to update car' })
+		logger.error('Failed to update station', err)
+		res.status(400).send({ err: 'Failed to update station' })
 	}
 }
 
-export async function removeCar(req, res) {
+export async function removeStation(req, res) {
 	try {
 		const carId = req.params.id
-		const removedId = await carService.remove(carId)
+		const removedId = await stationService.remove(carId)
 
 		res.send(removedId)
 	} catch (err) {
-		logger.error('Failed to remove car', err)
-		res.status(400).send({ err: 'Failed to remove car' })
+		logger.error('Failed to remove station', err)
+		res.status(400).send({ err: 'Failed to remove station' })
 	}
 }
 
-export async function addCarMsg(req, res) {
+export async function addStationMsg(req, res) {
 	const { loggedinUser } = req
 
 	try {
@@ -86,22 +105,22 @@ export async function addCarMsg(req, res) {
 			txt: req.body.txt,
 			by: loggedinUser,
 		}
-		const savedMsg = await carService.addCarMsg(carId, msg)
+		const savedMsg = await stationService.addStationMsg(carId, msg)
 		res.json(savedMsg)
 	} catch (err) {
-		logger.error('Failed to add car msg', err)
-		res.status(400).send({ err: 'Failed to add car msg' })
+		logger.error('Failed to add station msg', err)
+		res.status(400).send({ err: 'Failed to add station msg' })
 	}
 }
 
-export async function removeCarMsg(req, res) {
-	try {
-		const { id: carId, msgId } = req.params
+// export async function removeStationMsg(req, res) {
+// 	try {
+// 		const { id: carId, msgId } = req.params
 
-		const removedId = await carService.removeCarMsg(carId, msgId)
-		res.send(removedId)
-	} catch (err) {
-		logger.error('Failed to remove car msg', err)
-		res.status(400).send({ err: 'Failed to remove car msg' })
-	}
-}
+// 		const removedId = await stationService.removeStationMsg(carId, msgId)
+// 		res.send(removedId)
+// 	} catch (err) {
+// 		logger.error('Failed to remove station msg', err)
+// 		res.status(400).send({ err: 'Failed to remove station msg' })
+// 	}
+// }

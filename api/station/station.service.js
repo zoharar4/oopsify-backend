@@ -7,32 +7,27 @@ import { asyncLocalStorage } from '../../services/als.service.js'
 
 const PAGE_SIZE = 3
 
-export const carService = {
+export const stationService = {
 	remove,
 	query,
 	getById,
 	add,
 	update,
-	addCarMsg,
-	removeCarMsg,
+	addStationMsg,
+	removeStationMsg,
 }
 
-async function query(filterBy = { txt: '' }) {
+async function query(filterBy = null) {
 	try {
 		const criteria = _buildCriteria(filterBy)
-		const sort = _buildSort(filterBy)
 
-		const collection = await dbService.getCollection('car')
-		var carCursor = await collection.find(criteria, { sort })
+		const collection = await dbService.getCollection('station')
+		var carCursor = await collection.find(criteria)
 
-		if (filterBy.pageIdx !== undefined) {
-			carCursor.skip(filterBy.pageIdx * PAGE_SIZE).limit(PAGE_SIZE)
-		}
-
-		const cars = carCursor.toArray()
-		return cars
+		const stations = carCursor.toArray()
+		return stations
 	} catch (err) {
-		logger.error('cannot find cars', err)
+		logger.error('cannot find stations', err)
 		throw err
 	}
 }
@@ -41,13 +36,13 @@ async function getById(carId) {
 	try {
 		const criteria = { _id: ObjectId.createFromHexString(carId) }
 
-		const collection = await dbService.getCollection('car')
-		const car = await collection.findOne(criteria)
+		const collection = await dbService.getCollection('station')
+		const station = await collection.findOne(criteria)
 
-		car.createdAt = car._id.getTimestamp()
-		return car
+		station.createdAt = station._id.getTimestamp()
+		return station
 	} catch (err) {
-		logger.error(`while finding car ${carId}`, err)
+		logger.error(`while finding station ${carId}`, err)
 		throw err
 	}
 }
@@ -62,25 +57,25 @@ async function remove(carId) {
 		}
 		if (!isAdmin) criteria['owner._id'] = ownerId
 
-		const collection = await dbService.getCollection('car')
+		const collection = await dbService.getCollection('station')
 		const res = await collection.deleteOne(criteria)
 
-		if (res.deletedCount === 0) throw ('Not your car')
+		if (res.deletedCount === 0) throw ('Not your station')
 		return carId
 	} catch (err) {
-		logger.error(`cannot remove car ${carId}`, err)
+		logger.error(`cannot remove station ${carId}`, err)
 		throw err
 	}
 }
 
-async function add(car) {
+async function add(station) {
 	try {
-		const collection = await dbService.getCollection('car')
-		await collection.insertOne(car)
+		const collection = await dbService.getCollection('station')
+		await collection.insertOne(station)
 
-		return car
+		return station
 	} catch (err) {
-		logger.error('cannot insert car', err)
+		logger.error('cannot insert station', err)
 		throw err
 	}
 }
@@ -105,45 +100,39 @@ async function update(station, loggedinUser) {
 	}
 }
 
-async function addCarMsg(carId, msg) {
+async function addStationMsg(carId, msg) {
 	try {
 		const criteria = { _id: ObjectId.createFromHexString(carId) }
 		msg.id = makeId()
 
-		const collection = await dbService.getCollection('car')
+		const collection = await dbService.getCollection('station')
 		await collection.updateOne(criteria, { $push: { msgs: msg } })
 
 		return msg
 	} catch (err) {
-		logger.error(`cannot add car msg ${carId}`, err)
+		logger.error(`cannot add station msg ${carId}`, err)
 		throw err
 	}
 }
 
-async function removeCarMsg(carId, msgId) {
+async function removeStationMsg(carId, msgId) {
 	try {
 		const criteria = { _id: ObjectId.createFromHexString(carId) }
 
-		const collection = await dbService.getCollection('car')
+		const collection = await dbService.getCollection('station')
 		await collection.updateOne(criteria, { $pull: { msgs: { id: msgId } } })
 
 		return msgId
 	} catch (err) {
-		logger.error(`cannot remove car msg ${carId}`, err)
+		logger.error(`cannot remove station msg ${carId}`, err)
 		throw err
 	}
 }
 
 function _buildCriteria(filterBy) {
 	const criteria = {
-		vendor: { $regex: filterBy.txt, $options: 'i' },
-		speed: { $gte: filterBy.minSpeed },
+		_id: {$in: filterBy.stationsId.map((id) => ObjectId.createFromHexString(id))}
 	}
 
 	return criteria
-}
-
-function _buildSort(filterBy) {
-	if (!filterBy.sortField) return {}
-	return { [filterBy.sortField]: filterBy.sortDir }
 }
