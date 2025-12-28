@@ -36,8 +36,9 @@ async function query(filterBy = null) {
 async function getById(stationId) {
 	console.log(stationId)
 	try {
-		const criteria = { _id: stationId }
-
+		const criteria = {
+			_id: ObjectId.createFromHexString(stationId),
+		}
 		const collection = await dbService.getCollection('station')
 		const station = await collection.findOne(criteria)
 
@@ -132,9 +133,9 @@ async function removeStationMsg(stationId, msgId) {
 }
 
 function _buildCriteria(filterBy) {
-	console.log('criteria',filterBy)
+	console.log(filterBy)
 	const criteria = {
-		_id: {$in: filterBy.stationsId.map((_id) => _id)}
+		_id: {$in: filterBy.stationsId.map((_id) => ObjectId.createFromHexString(_id))}
 	}
 
 	return criteria

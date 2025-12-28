@@ -7,7 +7,7 @@ import { getStations,getStationById,addStation,updateStation,removeStation} from
 
 const router = express.Router()
 
-router.use(requireAuth)
+// router.use(requireAuth)
 
 router.get('/', log, getStations)
 router.get('/:id', log, getStationById)

@@ -3,10 +3,7 @@ import { stationService } from './station.service.js'
 
 export async function getStations(req, res) {
 	try {
-		console.log(req.stationsId)
-		const filterBy = {
-			stationsId:req?.stationsId
-		}
+		const filterBy = req.query
 		const stations = await stationService.query(filterBy)
 		res.json(stations)
 	} catch (err) {
@@ -18,6 +15,7 @@ export async function getStations(req, res) {
 export async function getStationById(req, res) {
 	try {
 		const stationId = req.params.id
+		console.log(stationId)
 		const station = await stationService.getById(stationId)
 		res.json(station)
 	} catch (err) {
@@ -68,7 +66,6 @@ export async function addStation(req, res) {
 
 export async function updateStation(req, res) {
 	const { loggedinUser, body: station } = req
-	console.log('req:', req)
 	const { _id: userId } = loggedinUser
 
 	if (station.owner.id !== userId) {
