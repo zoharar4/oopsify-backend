@@ -114,7 +114,7 @@ async function update(station) {
         }
 		const collection = await dbService.getCollection('station')
 		await collection.updateOne(criteria, {$set: stationToSave })
-		return { ...stationToSave, _id: station._id }
+		return stationToSave
 	}
 	catch (err) {
 		logger.error(`cannot update station ${station._id}`, err)
