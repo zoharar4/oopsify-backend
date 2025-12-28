@@ -82,7 +82,6 @@ async function add(user) {
             fullname: user.fullname,
             likedTracks: {},
             stations: [],
-            isAdmin: user.isAdmin,
         }
         const collection = await dbService.getCollection('user')
         await collection.insertOne(userToAdd)

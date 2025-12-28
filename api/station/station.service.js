@@ -52,13 +52,13 @@ async function getById(stationId) {
 
 async function remove(stationId) {
 	const { loggedinUser } = asyncLocalStorage.getStore()
-	const { _id: ownerId, isAdmin } = loggedinUser
+	const { _id: ownerId } = loggedinUser
 
 	try {
 		const criteria = {
 			_id: ObjectId.createFromHexString(stationId),
 		}
-		if (!isAdmin) criteria['owner._id'] = ownerId
+		criteria['owner._id'] = ownerId
 
 		const collection = await dbService.getCollection('station')
 		const res = await collection.deleteOne(criteria)
@@ -83,22 +83,41 @@ async function add(station) {
 	}
 }
 
-async function update(station, loggedinUser) {
+// async function update(station, loggedinUser) {
 
+// 	try {
+// 		const collection = await dbService.getCollection('user')
+// 		const userObjectId = ObjectId.createFromHexString(loggedinUser._id)
+
+// 		if (station.id === 'liked-tracks') {
+// 			await collection.updateOne({ _id: userObjectId }, { $set: { likedTracks: station } })
+// 		} else {
+// 			await collection.updateOne({ _id: userObjectId, 'stations.id': station.id }, { $set: { 'stations.$': station.id } })
+// 		}
+
+// 		const updatedUser = await collection.findOne({_id :userObjectId})
+// 		return updatedUser
+// 	} catch (err) {
+// 		logger.error(`cannot update station ${station.id}`, err)
+// 		throw err
+// 	}
+// }
+
+async function update(station) {
 	try {
-		const collection = await dbService.getCollection('user')
-		const userObjectId = ObjectId.createFromHexString(loggedinUser._id)
-
-		if (station.id === 'liked-tracks') {
-			await collection.updateOne({ _id: userObjectId }, { $set: { likedTracks: station } })
-		} else {
-			await collection.updateOne({ _id: userObjectId, 'stations.id': station.id }, { $set: { 'stations.$': station } })
-		}
-
-		const updatedUser = await collection.findOne({_id :userObjectId})
-		return updatedUser
-	} catch (err) {
-		logger.error(`cannot update station ${station.id}`, err)
+		const criteria = { _id: ObjectId.createFromHexString(station._id)}
+        const stationToSave = {
+			tracks: station.tracks,
+			name: station.name,
+			description: station.description,
+			images: station.images
+        }
+		const collection = await dbService.getCollection('station')
+		await collection.updateOne(criteria, {$set: stationToSave })
+		return { ...stationToSave, _id: station._id }
+	}
+	catch (err) {
+		logger.error(`cannot update station ${station._id}`, err)
 		throw err
 	}
 }
@@ -112,7 +131,7 @@ async function addStationMsg(stationId, msg) {
 		await collection.updateOne(criteria, { $push: { msgs: msg } })
 
 		return msg
-	} catch (err) {
+	}  catch (err) {
 		logger.error(`cannot add station msg ${stationId}`, err)
 		throw err
 	}

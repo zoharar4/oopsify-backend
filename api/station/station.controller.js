@@ -27,7 +27,7 @@ export async function getStationById(req, res) {
 export async function addStation(req, res) {
 	const { loggedinUser, body } = req
 	const stationToSave = {// use _id from now
-		description: body.description, 
+		description: body.description,
 		images: body.images?.length
 			? body.images.map(img => ({ ...img }))
 			: [{ url: '/src/assets/images/default-img.png' }],
@@ -68,13 +68,13 @@ export async function updateStation(req, res) {
 	const { loggedinUser, body: station } = req
 	const { _id: userId } = loggedinUser
 
-	if (station.owner.id !== userId) {
+	if (station.owner._id !== userId) {
 		res.status(403).send('Not your station...')
 		return
 	}
 
 	try {
-		const updatedStation = await stationService.update(station, loggedinUser)
+		const updatedStation = await stationService.update(station)
 		res.json(updatedStation)
 	} catch (err) {
 		logger.error('Failed to update station', err)
@@ -122,3 +122,23 @@ export async function addStationMsg(req, res) {
 // 		res.status(400).send({ err: 'Failed to remove station msg' })
 // 	}
 // }
+
+export async function addTrack(req, res) {
+	try {
+		const stationId = req.params.id
+		const {track} = req.params
+		const station = await stationService.getById(stationId)
+		const trackMap = new Map((station.tracks || []).map(t => [t._id, t]))
+		trackMap.set(track._id, track)
+		const stationToUpdate = {
+			...station,
+			tracks: Array.from(trackMap.values()),
+		}
+		const updatedStation = await stationService.update(stationToUpdate)
+		res.json(updatedStation)
+	}
+	catch (err) {
+		logger.error('Failed to add track to station', err)
+		res.status(400).send({ err: 'Failed to add track to station' })
+	}
+}
