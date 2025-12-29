@@ -80,11 +80,21 @@ async function add(user) {
             username: user.username,
             password: user.password,
             fullname: user.fullname,
-            likedTracks: {},
+            likedTracks: {
+            name: 'Liked Songs',
+            tracks: [],
+            owner: {
+                username: user.username,
+            },
+            images: [{ url: '/src/assets/images/liked-songs.png' }],
+            _id: 'liked-tracks',
+            type: 'station',
+        },
             stations: [],
         }
         const collection = await dbService.getCollection('user')
-        await collection.insertOne(userToAdd)
+        const savedUser = await collection.insertOne(userToAdd)
+        userToAdd.owner._id = savedUser._id
         return userToAdd
     } catch (err) {
         logger.error('cannot add user', err)

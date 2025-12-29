@@ -127,9 +127,20 @@ export async function addTrack(req, res) {
     try {
         const stationId = req.params.id
         const track = req.body 
-		console.log(stationId)
         const updatedStation = await stationService.addTrack(stationId, track)
         res.json(updatedStation)
+    } catch (err) {
+        logger.error('Failed to add track to station', err)
+        res.status(400).send({ err: 'Failed to add track to station' })
+    }
+}
+
+export async function removeTrack(req, res) {
+    try {
+        const {stationId,trackId} = req.params
+
+        const removedId = await stationService.removeTrack(stationId, trackId)
+        res.send(removedId)
     } catch (err) {
         logger.error('Failed to add track to station', err)
         res.status(400).send({ err: 'Failed to add track to station' })

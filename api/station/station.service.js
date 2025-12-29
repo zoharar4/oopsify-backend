@@ -16,6 +16,7 @@ export const stationService = {
 	addStationMsg,
 	removeStationMsg,
 	addTrack,
+	removeTrack,
 }
 
 async function query(filterBy = null) {
@@ -173,6 +174,21 @@ async function addTrack(stationId, track) {
         return await collection.findOne({ _id: stationId })
     } catch (err) {
         logger.error(`cannot add track to station ${stationId}`, err)
+        throw err
+    }
+}
+
+async function removeTrack(stationId, trackId) {
+    try {
+        const collection = await dbService.getCollection('station')
+        await collection.updateOne(
+            { _id: ObjectId.createFromHexString(stationId) },
+            { $pull: { tracks: { _id: trackId } } }
+        )
+
+        return trackId
+    } catch (err) {
+        logger.error(`cannot remove track from station ${stationId}`, err)
         throw err
     }
 }
