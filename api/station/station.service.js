@@ -21,13 +21,22 @@ export const stationService = {
 
 async function query(filterBy = null) {
 	try {
-		const criteria = filterBy && filterBy.stationsId ? _buildCriteria(filterBy) : {}
+		const criteria = filterBy?.stationsId ? _buildCriteria(filterBy) : {}
 
 		const collection = await dbService.getCollection('station')
-		var stationCursor = await collection.find(criteria)
+		var stations = await collection.find(criteria).toArray()
+		if (filterBy?.stationsId) {
+            const orderMap = new Map(
+                filterBy.stationsId.map((id, idx) => [id.toString(), idx])
+            )
 
-		const stations = stationCursor.toArray()
-		
+            stations.sort(
+                (a, b) =>
+                    orderMap.get(a._id.toString()) -
+                    orderMap.get(b._id.toString())
+            )
+        }
+		console.log('stations ',stations )
 		return stations
 	} catch (err) {
 		logger.error('cannot find stations', err)
