@@ -2,8 +2,6 @@ import { stationService } from './services/station.service.js'
 import { userService } from './services/user.service.js'
 import { prettyJSON } from './services/util.service.js'
 
-console.log('Simple driver to test some API calls')
-
 window.onLoadStations = onLoadStations
 window.onLoadUsers = onLoadUsers
 window.onAddStation = onAddStation
