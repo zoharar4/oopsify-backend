@@ -65,16 +65,24 @@ export async function addStation(req, res) {
 // }
 
 export async function updateStation(req, res) {
-	const { loggedinUser, body: station } = req
-	const { _id: userId } = loggedinUser
-
-	if (station.owner._id !== userId) {
-		res.status(403).send('Not your station...')
-		return
-	}
-
 	try {
-		const updatedStation = await stationService.update(station)
+		const { loggedinUser, body, file: img } = req
+		const { _id: userId } = loggedinUser
+		// Get the station from DB first
+		
+		const stationFromDb = await stationService.getById(req.params.id)
+		if (!stationFromDb) return res.status(404).send('Station not found')
+		console.log(img)
+		// Check ownership
+		if (stationFromDb.owner._id.toString() !== userId) {
+			return res.status(403).send('Not your station...')
+		}
+		stationFromDb.name = body.name || stationFromDb.name
+		stationFromDb.description = body.description || stationFromDb.description
+		if (img) {
+			stationFromDb.images = [{ url: `/uploads/${img.filename}` }]
+		}
+		const updatedStation = await stationService.update(stationFromDb)
 		res.json(updatedStation)
 	} catch (err) {
 		logger.error('Failed to update station', err)
@@ -124,25 +132,25 @@ export async function addStationMsg(req, res) {
 // }
 
 export async function addTrack(req, res) {
-    try {
-        const stationId = req.params.id
-        const track = req.body 
-        const updatedStation = await stationService.addTrack(stationId, track)
-        res.json(updatedStation)
-    } catch (err) {
-        logger.error('Failed to add track to station', err)
-        res.status(400).send({ err: 'Failed to add track to station' })
-    }
+	try {
+		const stationId = req.params.id
+		const track = req.body
+		const updatedStation = await stationService.addTrack(stationId, track)
+		res.json(updatedStation)
+	} catch (err) {
+		logger.error('Failed to add track to station', err)
+		res.status(400).send({ err: 'Failed to add track to station' })
+	}
 }
 
 export async function removeTrack(req, res) {
-    try {
-        const {stationId,trackId} = req.params
+	try {
+		const { stationId, trackId } = req.params
 
-        const removedId = await stationService.removeTrack(stationId, trackId)
-        res.send(removedId)
-    } catch (err) {
-        logger.error('Failed to add track to station', err)
-        res.status(400).send({ err: 'Failed to add track to station' })
-    }
+		const removedId = await stationService.removeTrack(stationId, trackId)
+		res.send(removedId)
+	} catch (err) {
+		logger.error('Failed to add track to station', err)
+		res.status(400).send({ err: 'Failed to add track to station' })
+	}
 }
