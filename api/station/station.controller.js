@@ -44,26 +44,6 @@ export async function addStation(req, res) {
 	}
 }
 
-
-// export async function updateUserStation(req, res) { zohar?
-// 	const { loggedinUser, body: station } = req
-// 	console.log('req:',req)
-// 	const { _id: userId, isAdmin } = loggedinUser
-
-// 	if (!isAdmin && station.owner.id !== userId) {
-// 		res.status(403).send('Not your station...')
-// 		return
-// 	}
-
-// 	try {
-// 		const updatedStation = await stationService.update(station, loggedinUser)
-// 		res.json(updatedStation)
-// 	} catch (err) {
-// 		logger.error('Failed to update station', err)
-// 		res.status(400).send({ err: 'Failed to update station' })
-// 	}
-// }
-
 export async function updateStation(req, res) {
 	const { loggedinUser, body: station } = req
 	const { _id: userId } = loggedinUser
@@ -111,23 +91,13 @@ export async function addStationMsg(req, res) {
 	}
 }
 
-// export async function removeStationMsg(req, res) {
-// 	try {
-// 		const { id: stationId, msgId } = req.params
-
-// 		const removedId = await stationService.removeStationMsg(stationId, msgId)
-// 		res.send(removedId)
-// 	} catch (err) {
-// 		logger.error('Failed to remove station msg', err)
-// 		res.status(400).send({ err: 'Failed to remove station msg' })
-// 	}
-// }
-
 export async function addTrack(req, res) {
     try {
         const stationId = req.params.id
         const track = req.body 
+		console.log('stationId: ', stationId)
         const updatedStation = await stationService.addTrack(stationId, track)
+		
         res.json(updatedStation)
     } catch (err) {
         logger.error('Failed to add track to station', err)
