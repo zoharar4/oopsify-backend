@@ -59,7 +59,7 @@ async function update(user) {
         // peek only updatable properties
         const userToSave = {
             _id: ObjectId.createFromHexString(user._id), // needed for the returned obj
-            username:user.username,
+            username: user.username,
             fullname: user.fullname,
             likedTracks: user.likedTracks,
             stations: user.stations,
@@ -81,20 +81,22 @@ async function add(user) {
             password: user.password,
             fullname: user.fullname,
             likedTracks: {
-            name: 'Liked Songs',
-            tracks: [],
-            owner: {
-                username: user.username,
+                name: 'Liked Songs',
+                tracks: [],
+                owner: {
+                    username: user.username,
+                },
+                images: [{ url: '/src/assets/images/liked-songs.png' }],
+                _id: 'liked-tracks',
+                type: 'station',
             },
-            images: [{ url: '/src/assets/images/liked-songs.png' }],
-            _id: 'liked-tracks',
-            type: 'station',
-        },
             stations: [],
         }
         const collection = await dbService.getCollection('user')
         const savedUser = await collection.insertOne(userToAdd)
-        userToAdd.owner._id = savedUser._id
+        console.log('savedUser', savedUser)
+        userToAdd.likedTracks.owner._id = savedUser.insertedId
+        console.log('userToAdd', userToAdd)
         return userToAdd
     } catch (err) {
         logger.error('cannot add user', err)

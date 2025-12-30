@@ -33,7 +33,7 @@ async function signup({ username, password, fullname }) {
 
 	logger.debug(`auth.service - signup with username: ${username}, fullname: ${fullname}`)
 	if (!username || !password || !fullname) return Promise.reject('Missing required signup information')
-
+	console.log(username)
 	const userExist = await userService.getByUsername(username)
 	if (userExist) return Promise.reject('Username already taken')
 
