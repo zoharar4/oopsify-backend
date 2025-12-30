@@ -3,14 +3,16 @@ import { stationService } from './station.service.js'
 import { uploadStationImage } from '../services/cloudinary.service.js'
 
 export async function getStations(req, res) {
-	try {
-		const filterBy = req.query
-		const stations = await stationService.query(filterBy)
-		res.json(stations)
-	} catch (err) {
-		logger.error('Failed to get stations', err)
-		res.status(400).send({ err: 'Failed to get stations' })
-	}
+    try {
+        const filterBy = req.query
+        console.log(filterBy)
+
+        const stations = await stationService.query(filterBy)
+        res.json(stations)
+    } catch (err) {
+        logger.error('Failed to get stations', err)
+        res.status(400).send({ err: 'Failed to get stations' })
+    }
 }
 
 export async function getStationById(req, res) {
@@ -48,7 +50,7 @@ export async function updateStation(req, res) {
     try {
         const { loggedinUser, body, file } = req
         const { _id: userId } = loggedinUser
-
+		console.log(body)
         const station = await stationService.getById(req.params.id)
         if (!station) return res.status(404).send('Station not found')
         if (station.owner._id !== userId) {
@@ -57,7 +59,8 @@ export async function updateStation(req, res) {
 
         station.name = body.name ?? station.name
         station.description = body.description ?? station.description
-		console.log(file)
+		station.tracks = body.tracks ?? station.tracks
+		console.log(station)
         if (file) {
             const uploadRes = await uploadStationImage(file.buffer,station._id)
             station.images = [{ url: uploadRes.secure_url }]
