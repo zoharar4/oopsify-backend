@@ -121,7 +121,6 @@ async function update(station) {
 			description: station.description,
 			images: station.images
         }
-		console.log('stationToSave name',stationToSave.name)
 		const collection = await dbService.getCollection('station')
 		await collection.updateOne(criteria, {$set: stationToSave })
 		return {...stationToSave}

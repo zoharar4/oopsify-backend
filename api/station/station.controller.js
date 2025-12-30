@@ -4,7 +4,7 @@ import { uploadStationImage } from '../services/cloudinary.service.js'
 
 export async function getStations(req, res) {
 	try {
-		const filterBy = req.query
+		const {filterBy} = req.query
 		const stations = await stationService.query(filterBy)
 		res.json(stations)
 	} catch (err) {
@@ -57,7 +57,6 @@ export async function updateStation(req, res) {
 
         station.name = body.name ?? station.name
         station.description = body.description ?? station.description
-		console.log(file)
         if (file) {
             const uploadRes = await uploadStationImage(file.buffer,station._id)
             station.images = [{ url: uploadRes.secure_url }]
