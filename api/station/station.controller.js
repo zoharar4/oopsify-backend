@@ -1,5 +1,6 @@
 import { logger } from '../../services/logger.service.js'
 import { stationService } from './station.service.js'
+import { uploadStationImage } from '../services/cloudinary.service.js'
 
 export async function getStations(req, res) {
 	try {
@@ -44,30 +45,30 @@ export async function addStation(req, res) {
 }
 
 export async function updateStation(req, res) {
-	try {
-		const { loggedinUser, body, file} = req
-		const { _id: userId } = loggedinUser
-		console.log('name',body.name)
-		console.log('description', body.description)
-		const stationFromDb = await stationService.getById(req.params.id)
-		if (!stationFromDb) return res.status(404).send('Station not found')
-		if (stationFromDb.owner._id !== userId) {
-			return res.status(403).send('Not your station...')
-		}
-		stationFromDb.name = body.name || stationFromDb.name
-		stationFromDb.description = body.description || stationFromDb.description
-		if (file && file.filename) {
-			stationFromDb.images = [{ url: `/uploads/${file.filename}` }]
-		}
-		else{
-			stationFromDb.images = [{ url: `/src/assets/images/default-img.png` }]
-		}
-		const updatedStation = await stationService.update(stationFromDb)
-		res.json(updatedStation)
-	} catch (err) {
-		logger.error('Failed to update station', err)
-		res.status(400).send({ err: 'Failed to update station' })
-	}
+    try {
+        const { loggedinUser, body, file } = req
+        const { _id: userId } = loggedinUser
+
+        const station = await stationService.getById(req.params.id)
+        if (!station) return res.status(404).send('Station not found')
+        if (station.owner._id !== userId) {
+            return res.status(403).send('Not your station...')
+        }
+
+        station.name = body.name ?? station.name
+        station.description = body.description ?? station.description
+		console.log(file)
+        if (file) {
+            const uploadRes = await uploadStationImage(file.buffer,station._id)
+            station.images = [{ url: uploadRes.secure_url }]
+        }
+
+        const updatedStation = await stationService.update(station)
+        res.json(updatedStation)
+    } catch (err) {
+        logger.error('Failed to update station', err)
+        res.status(400).send({ err: 'Failed to update station' })
+    }
 }
 
 export async function removeStation(req, res) {
