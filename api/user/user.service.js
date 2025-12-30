@@ -94,9 +94,7 @@ async function add(user) {
         }
         const collection = await dbService.getCollection('user')
         const savedUser = await collection.insertOne(userToAdd)
-        console.log('savedUser', savedUser)
         userToAdd.likedTracks.owner._id = savedUser.insertedId
-        console.log('userToAdd', userToAdd)
         return userToAdd
     } catch (err) {
         logger.error('cannot add user', err)

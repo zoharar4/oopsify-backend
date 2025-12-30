@@ -15,7 +15,6 @@ export async function getStations(req, res) {
 export async function getStationById(req, res) {
 	try {
 		const stationId = req.params.id
-		console.log(stationId)
 		const station = await stationService.getById(stationId)
 		res.json(station)
 	} catch (err) {
@@ -46,21 +45,22 @@ export async function addStation(req, res) {
 
 export async function updateStation(req, res) {
 	try {
-		const { loggedinUser, body, file: img } = req
+		const { loggedinUser, body, file} = req
 		const { _id: userId } = loggedinUser
-		// Get the station from DB first
-		
+		console.log('name',body.name)
+		console.log('description', body.description)
 		const stationFromDb = await stationService.getById(req.params.id)
 		if (!stationFromDb) return res.status(404).send('Station not found')
-		console.log(img)
-		// Check ownership
-		if (stationFromDb.owner._id.toString() !== userId) {
+		if (stationFromDb.owner._id !== userId) {
 			return res.status(403).send('Not your station...')
 		}
 		stationFromDb.name = body.name || stationFromDb.name
 		stationFromDb.description = body.description || stationFromDb.description
-		if (img) {
-			stationFromDb.images = [{ url: `/uploads/${img.filename}` }]
+		if (file && file.filename) {
+			stationFromDb.images = [{ url: `/uploads/${file.filename}` }]
+		}
+		else{
+			stationFromDb.images = [{ url: `/src/assets/images/default-img.png` }]
 		}
 		const updatedStation = await stationService.update(stationFromDb)
 		res.json(updatedStation)
@@ -103,9 +103,8 @@ export async function addTrack(req, res) {
     try {
         const stationId = req.params.id
         const track = req.body 
-		console.log('stationId: ', stationId)
-        const updatedStation = await stationService.addTrack(stationId, track)
 		
+        const updatedStation = await stationService.addTrack(stationId, track)
         res.json(updatedStation)
     } catch (err) {
         logger.error('Failed to add track to station', err)

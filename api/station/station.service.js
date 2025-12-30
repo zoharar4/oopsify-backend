@@ -36,7 +36,6 @@ async function query(filterBy = null) {
                     orderMap.get(b._id.toString())
             )
         }
-		console.log('stations ',stations )
 		return stations
 	} catch (err) {
 		logger.error('cannot find stations', err)
@@ -45,14 +44,13 @@ async function query(filterBy = null) {
 }
 
 async function getById(stationId) {
-	console.log(stationId)
 	try {
 		const criteria = {
 			_id: ObjectId.createFromHexString(stationId),
 		}
+		
 		const collection = await dbService.getCollection('station')
 		const station = await collection.findOne(criteria)
-
 		//station.createdAt = station._id.getTimestamp()
 		return station
 	} catch (err) {
@@ -116,13 +114,14 @@ async function add(station) {
 
 async function update(station) {
 	try {
-		const criteria = { _id: ObjectId.createFromHexString(station._id)}
+		const criteria = { _id: typeof station._id === 'string' ? ObjectId.createFromHexString(station._id) : station._id}
         const stationToSave = {
 			tracks: station.tracks,
 			name: station.name,
 			description: station.description,
 			images: station.images
         }
+		console.log('stationToSave name',stationToSave.name)
 		const collection = await dbService.getCollection('station')
 		await collection.updateOne(criteria, {$set: stationToSave })
 		return {...stationToSave}
@@ -163,7 +162,6 @@ async function removeStationMsg(stationId, msgId) {
 }
 
 function _buildCriteria(filterBy) {
-	console.log(filterBy)
 	const criteria = {
 		_id: {$in: filterBy.stationsId.map((_id) => ObjectId.createFromHexString(_id))}
 	}
@@ -174,13 +172,12 @@ function _buildCriteria(filterBy) {
 async function addTrack(stationId, track) {
     try {
         const collection = await dbService.getCollection('station')
-		console.log(ObjectId.createFromHexString(stationId))
         await collection.updateOne(
             { _id: ObjectId.createFromHexString(stationId) },
             { $addToSet: { tracks: track } } 
         )
 
-        return await collection.findOne({ _id: ObjectId.createFromHexString(stationId) })?.tracks
+        return await collection.findOne({ _id: ObjectId.createFromHexString(stationId) })
     } catch (err) {
         logger.error(`cannot add track to station ${stationId}`, err)
         throw err
@@ -201,3 +198,4 @@ async function removeTrack(stationId, trackId) {
         throw err
     }
 }
+
