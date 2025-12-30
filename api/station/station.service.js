@@ -174,13 +174,13 @@ function _buildCriteria(filterBy) {
 async function addTrack(stationId, track) {
     try {
         const collection = await dbService.getCollection('station')
-
+		console.log(ObjectId.createFromHexString(stationId))
         await collection.updateOne(
             { _id: ObjectId.createFromHexString(stationId) },
             { $addToSet: { tracks: track } } 
         )
 
-        return await collection.findOne({ _id: stationId })
+        return await collection.findOne({ _id: ObjectId.createFromHexString(stationId) })?.tracks
     } catch (err) {
         logger.error(`cannot add track to station ${stationId}`, err)
         throw err
